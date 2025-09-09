@@ -1,0 +1,123 @@
+---
+globs: *interface*.py,*gui*.py
+description: Руководство по разработке GUI интерфейсов
+---
+
+# Руководство по разработке GUI
+
+## Tkinter интерфейсы
+
+### Структура интерфейса
+```python
+class HistoryInterface:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.setup_ui()
+        self.setup_paths()
+        self.load_models()
+    
+    def setup_ui(self):
+        # Основное окно
+        self.root.title("ИИ-История")
+        self.root.geometry("1200x800")
+        self.root.configure(bg='#ecf0f1')
+        
+        # Создание фреймов
+        self.create_widgets()
+    
+    def create_widgets(self):
+        # Левая панель - управление файлами
+        # Правая панель - работа с ИИ
+        pass
+```
+
+### Цветовая схема
+```python
+# Основные цвета проекта
+COLORS = {
+    'primary': '#3498db',      # Синий
+    'secondary': '#2ecc71',    # Зеленый
+    'danger': '#e74c3c',       # Красный
+    'warning': '#f39c12',      # Оранжевый
+    'background': '#ecf0f1',   # Светло-серый
+    'text': '#2c3e50',         # Темно-серый
+}
+```
+
+### Обработка событий
+```python
+def on_button_click(self, event=None):
+    """Обработчик нажатия кнопки"""
+    try:
+        # Основная логика
+        self.perform_action()
+    except Exception as e:
+        messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
+        logger.error(f"Ошибка в обработчике: {e}")
+```
+
+### Асинхронные операции
+```python
+import threading
+
+def long_running_task(self):
+    """Долгая операция в отдельном потоке"""
+    def task():
+        try:
+            # Долгая операция
+            result = self.perform_long_task()
+            # Обновляем UI в главном потоке
+            self.root.after(0, lambda: self.update_ui(result))
+        except Exception as e:
+            self.root.after(0, lambda: self.show_error(e))
+    
+    thread = threading.Thread(target=task, daemon=True)
+    thread.start()
+```
+
+## Работа с путями в exe
+
+### Определение режима работы
+```python
+def is_exe():
+    """Проверяет, запущен ли скрипт как exe файл"""
+    return getattr(sys, 'frozen', False)
+
+def get_base_dir():
+    """Возвращает базовую директорию"""
+    if is_exe():
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+```
+
+### Создание необходимых директорий
+```python
+def ensure_directories():
+    """Создает необходимые директории"""
+    directories = ['data/raw', 'data/processed', 'models', 'logs']
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+```
+
+## Веб-интерфейс (Flask)
+
+### Структура приложения
+```python
+from flask import Flask, render_template, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/generate', methods=['POST'])
+def generate_text():
+    try:
+        prompt = request.json.get('prompt')
+        result = generate_response(prompt)
+        return jsonify({'result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+```

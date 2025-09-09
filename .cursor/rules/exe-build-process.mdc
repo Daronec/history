@@ -1,0 +1,124 @@
+---
+globs: *build*.py,*.spec
+description: Процесс сборки exe файлов с PyInstaller
+---
+
+# Процесс сборки exe файлов
+
+## Версии exe файлов
+
+### 1. Полная версия (AI-History-Full.exe)
+- **Размер**: ~2.7 ГБ
+- **Включает**: Все ML библиотеки, модели, данные
+- **Скрипт**: [scripts/build/build_windows_exe.py](mdc:scripts/build/build_windows_exe.py)
+- **Интерфейс**: [interfaces/windows/windows_interface_exe.py](mdc:interfaces/windows/windows_interface_exe.py)
+
+### 2. Внешняя версия (AI-History-Interface.exe)
+- **Размер**: ~220 МБ
+- **Включает**: Интерфейс + базовые библиотеки
+- **Требует**: Внешние файлы проекта
+- **Скрипт**: [scripts/build/build_external_exe.py](mdc:scripts/build/build_external_exe.py)
+
+### 3. Минимальная версия (AI-History-Mini.exe)
+- **Размер**: ~9.5 МБ
+- **Включает**: Только интерфейс управления файлами
+- **Скрипт**: [scripts/build/build_minimal_exe.py](mdc:scripts/build/build_minimal_exe.py)
+- **Интерфейс**: [interfaces/windows/windows_interface_minimal.py](mdc:interfaces/windows/windows_interface_minimal.py)
+
+## PyInstaller команды
+
+### Базовая команда
+```python
+pyinstaller_cmd = [
+    'pyinstaller',
+    '--onefile',                    # Один exe файл
+    '--windowed',                   # Без консоли
+    '--name', exe_name,             # Имя файла
+    '--distpath', 'dist',           # Папка вывода
+    '--workpath', 'build',          # Временная папка
+    '--specpath', '.',              # Папка для .spec файла
+    '--clean',                      # Очистка перед сборкой
+    entry_point                     # Точка входа
+]
+```
+
+### Добавление данных
+```python
+# Для полной версии
+'--add-data', 'src;src',
+'--add-data', 'data;data',
+'--add-data', 'models;models',
+```
+
+### Скрытые импорты
+```python
+hidden_imports = [
+    'tkinter',
+    'tkinter.ttk',
+    'tkinter.messagebox',
+    'tkinter.filedialog',
+    'transformers',
+    'torch',
+    'tensorflow',
+    'numpy',
+    'pandas',
+    'sklearn',
+    'matplotlib',
+    'seaborn',
+    'requests',
+    'beautifulsoup4',
+    'lxml',
+    'tqdm',
+    'jupyter',
+    'ipykernel'
+]
+```
+
+## Обработка путей в exe
+
+### Определение режима
+```python
+def is_exe():
+    return getattr(sys, 'frozen', False)
+
+def get_resource_path(relative_path):
+    if is_exe():
+        return os.path.join(sys._MEIPASS, relative_path)
+    else:
+        return os.path.join(os.path.dirname(__file__), relative_path)
+```
+
+### Создание структуры проекта
+```python
+def create_project_structure():
+    """Создает структуру проекта для внешней версии"""
+    directories = [
+        'data/raw',
+        'data/processed', 
+        'models',
+        'logs',
+        'configs'
+    ]
+    
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+```
+
+## Очистка после сборки
+
+```python
+def cleanup_build_files():
+    """Удаляет временные файлы сборки"""
+    files_to_remove = [
+        f'{exe_name}.spec',
+        'build',
+        'dist'
+    ]
+    
+    for item in files_to_remove:
+        if os.path.exists(item):
+            if os.path.isdir(item):
+                shutil.rmtree(item)
+            else:
+                os.remove(item)
+```

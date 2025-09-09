@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ ИИ для изучения истории</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .input-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .parameters {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .output-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .result-box {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .result-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .loading {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .error {
+            color: #e74c3c;
+            background: #fdf2f2;
+            border: 1px solid #fecaca;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            color: #27ae60;
+            background: #f0f9f0;
+            border: 1px solid #c3e6c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-no {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .history-section {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .history-prompt {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .history-result {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .history-meta {
+            font-size: 12px;
+            color: #adb5bd;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .parameters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ ИИ для изучения истории</h1>
+            <p>Интерактивный веб-интерфейс для работы с ИИ моделью</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2>📝 Введите ваш промпт</h2>
+                
+                <div class="status" id="status">
+                    <div class="status-item status-no" id="english-status">
+                        🇺🇸 Английская модель
+                    </div>
+                    <div class="status-item status-no" id="russian-status">
+                        🇷🇺 Русская модель
+                    </div>
+                </div>
+
+                <form id="prompt-form">
+                    <div class="form-group">
+                        <label for="prompt">Промпт:</label>
+                        <textarea id="prompt" name="prompt" placeholder="Введите ваш вопрос или начало предложения...&#10;Например: 'В 1812 году произошло' или 'Петр I известен тем, что'"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="language">Язык модели:</label>
+                        <select id="language" name="language">
+                            <option value="russian">🇷🇺 Русский (рекомендуется)</option>
+                            <option value="english">🇺🇸 Английский</option>
+                        </select>
+                    </div>
+
+                    <div class="parameters">
+                        <div class="form-group">
+                            <label for="max_length">Максимальная длина:</label>
+                            <input type="number" id="max_length" name="max_length" value="100" min="10" max="500">
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">Креативность:</label>
+                            <input type="range" id="temperature" name="temperature" min="0.1" max="1.5" step="0.1" value="0.7">
+                            <span id="temp-value">0.7</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="generate-btn">
+                        🚀 Сгенерировать ответ
+                    </button>
+                </form>
+            </div>
+
+            <div class="output-section">
+                <h2>🤖 Результат</h2>
+                <div class="result-box" id="result-box">
+                    <div class="result-text" id="result-text">
+                        Введите промпт и нажмите "Сгенерировать ответ"
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h2>📚 История запросов</h2>
+                <div id="history-container">
+                    <div class="loading">Загрузка истории...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Обновление значения температуры
+        const tempSlider = document.getElementById('temperature');
+        const tempValue = document.getElementById('temp-value');
+        
+        tempSlider.addEventListener('input', function() {
+            tempValue.textContent = this.value;
+        });
+
+        // Загрузка статуса моделей
+        async function loadStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                const englishStatus = document.getElementById('english-status');
+                const russianStatus = document.getElementById('russian-status');
+                
+                if (data.english_model) {
+                    englishStatus.className = 'status-item status-ok';
+                    englishStatus.textContent = '🇺🇸 Английская модель ✓';
+                } else {
+                    englishStatus.className = 'status-item status-no';
+                    englishStatus.textContent = '🇺🇸 Английская модель ✗';
+                }
+                
+                if (data.russian_model) {
+                    russianStatus.className = 'status-item status-ok';
+                    russianStatus.textContent = '🇷🇺 Русская модель ✓';
+                } else {
+                    russianStatus.className = 'status-item status-no';
+                    russianStatus.textContent = '🇷🇺 Русская модель ✗';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статуса:', error);
+            }
+        }
+
+        // Загрузка истории
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+                
+                const container = document.getElementById('history-container');
+                
+                if (data.success && data.history.length > 0) {
+                    container.innerHTML = data.history.slice(-10).reverse().map(item => `
+                        <div class="history-item">
+                            <div class="history-prompt">${item.prompt}</div>
+                            <div class="history-result">${item.result}</div>
+                            <div class="history-meta">
+                                ${item.model} • ${new Date(item.timestamp).toLocaleString('ru-RU')}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="loading">История пуста</div>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки истории:', error);
+                document.getElementById('history-container').innerHTML = '<div class="error">Ошибка загрузки истории</div>';
+            }
+        }
+
+        // Обработка формы
+        document.getElementById('prompt-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const prompt = document.getElementById('prompt').value.trim();
+            const language = document.getElementById('language').value;
+            const maxLength = parseInt(document.getElementById('max_length').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            
+            if (!prompt) {
+                alert('Пожалуйста, введите промпт');
+                return;
+            }
+            
+            const generateBtn = document.getElementById('generate-btn');
+            const resultText = document.getElementById('result-text');
+            
+            // Показываем загрузку
+            generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ Генерируем...';
+            resultText.innerHTML = '<div class="loading">Генерируем ответ...</div>';
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        language: language,
+                        max_length: maxLength,
+                        temperature: temperature
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultText.innerHTML = `
+                        <div class="success">
+                            <strong>Модель:</strong> ${data.model}<br>
+                            <strong>Время:</strong> ${new Date(data.timestamp).toLocaleString('ru-RU')}
+                        </div>
+                        <div class="result-text">${data.result}</div>
+                    `;
+                    
+                    // Обновляем историю
+                    loadHistory();
+                } else {
+                    resultText.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultText.innerHTML = `<div class="error">Ошибка: ${error.message}</div>`;
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🚀 Сгенерировать ответ';
+            }
+        });
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatus();
+            loadHistory();
+        });
+    </script>
+</body>
+</html>

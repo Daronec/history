@@ -1,0 +1,166 @@
+---
+globs: *.bat,*windows*.py
+description: Специфика работы на Windows
+---
+
+# Специфика работы на Windows
+
+## Кодировка и локализация
+
+### Настройка кодировки
+```python
+import sys
+import os
+
+# Устанавливаем UTF-8 кодировку
+if sys.platform == 'win32':
+    os.system('chcp 65001 > nul')
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+```
+
+### Batch файлы
+```batch
+@echo off
+chcp 65001 > nul
+set PYTHONIOENCODING=utf-8
+python train_model.py
+pause
+```
+
+## Пути в Windows
+
+### Обработка путей
+```python
+import os
+from pathlib import Path
+
+# Используйте pathlib для кроссплатформенности
+data_path = Path("data/raw")
+model_path = Path("models") / "model.bin"
+
+# Для Windows специфичных операций
+if sys.platform == 'win32':
+    # Активация виртуального окружения
+    venv_activate = "venv\\Scripts\\activate.bat"
+    
+    # Команды PowerShell
+    powershell_cmd = "powershell.exe -Command"
+```
+
+### Виртуальное окружение
+```python
+def activate_venv():
+    """Активирует виртуальное окружение на Windows"""
+    if sys.platform == 'win32':
+        venv_path = Path("venv/Scripts/activate.bat")
+        if venv_path.exists():
+            os.system(f'call {venv_path}')
+```
+
+## Makefile для Windows
+
+### Создание batch файлов
+```makefile
+# Windows команды
+.PHONY: train train-ru clean
+
+train:
+	@echo Обучение английской модели...
+	call venv\Scripts\activate.bat && python src\train_model.py
+
+train-ru:
+	@echo Обучение русской модели...
+	call venv\Scripts\activate.bat && python scripts\training\train_model_ru.py
+
+clean:
+	@echo Очистка временных файлов...
+	if exist build rmdir /s /q build
+	if exist dist rmdir /s /q dist
+	if exist *.spec del *.spec
+```
+
+## PyInstaller на Windows
+
+### Специфичные настройки
+```python
+# Windows специфичные настройки PyInstaller
+pyinstaller_args = [
+    '--onefile',
+    '--windowed',  # Скрывает консоль
+    '--name', 'AI-History',
+    '--icon', 'icon.ico',  # Иконка приложения
+    '--version-file', 'version_info.txt',  # Информация о версии
+]
+
+# Для Windows 10/11
+if sys.platform == 'win32':
+    pyinstaller_args.extend([
+        '--uac-admin',  # Запуск от имени администратора (если нужно)
+        '--manifest', 'app.manifest',  # Манифест приложения
+    ])
+```
+
+## Обработка ошибок Windows
+
+### Специфичные исключения
+```python
+import subprocess
+
+def run_windows_command(command):
+    """Выполняет команду Windows с обработкой ошибок"""
+    try:
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='replace'
+        )
+        return result.returncode == 0, result.stdout, result.stderr
+    except Exception as e:
+        logger.error(f"Ошибка выполнения команды Windows: {e}")
+        return False, "", str(e)
+```
+
+## Файловые операции
+
+### Создание ярлыков
+```python
+import win32com.client
+
+def create_shortcut(target_path, shortcut_path, description=""):
+    """Создает ярлык на Windows"""
+    try:
+        shell = win32com.client.Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortCut(shortcut_path)
+        shortcut.Targetpath = target_path
+        shortcut.Description = description
+        shortcut.save()
+        return True
+    except Exception as e:
+        logger.error(f"Ошибка создания ярлыка: {e}")
+        return False
+```
+
+### Работа с реестром
+```python
+import winreg
+
+def add_to_startup(app_name, app_path):
+    """Добавляет приложение в автозагрузку Windows"""
+    try:
+        key = winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Run",
+            0,
+            winreg.KEY_SET_VALUE
+        )
+        winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, app_path)
+        winreg.CloseKey(key)
+        return True
+    except Exception as e:
+        logger.error(f"Ошибка добавления в автозагрузку: {e}")
+        return False
+```

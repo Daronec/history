@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+description: Основная структура проекта ИИ-История
+---
+
+# Структура проекта ИИ-История
+
+## Основные директории
+
+- **`src/`** - Основной код проекта
+  - [train_model.py](mdc:src/train_model.py) - Обучение английской модели
+  - [generate_text.py](mdc:src/generate_text.py) - Генерация текста
+  - [data_processing.py](mdc:src/data_processing.py) - Обработка данных
+
+- **`interfaces/`** - Пользовательские интерфейсы
+  - **`windows/`** - Windows интерфейсы
+    - [windows_interface.py](mdc:interfaces/windows/windows_interface.py) - Разработческая версия
+    - [windows_interface_exe.py](mdc:interfaces/windows/windows_interface_exe.py) - Версия для exe
+    - [windows_interface_minimal.py](mdc:interfaces/windows/windows_interface_minimal.py) - Минимальная версия
+  - **`web/`** - Веб-интерфейсы
+    - [web_interface.py](mdc:interfaces/web/web_interface.py) - Flask веб-интерфейс
+
+- **`scripts/`** - Вспомогательные скрипты
+  - **`build/`** - Скрипты сборки exe файлов
+    - [build_windows_exe.py](mdc:scripts/build/build_windows_exe.py) - Полная версия
+    - [build_external_exe.py](mdc:scripts/build/build_external_exe.py) - Внешняя версия
+    - [build_minimal_exe.py](mdc:scripts/build/build_minimal_exe.py) - Минимальная версия
+  - **`training/`** - Скрипты обучения
+    - [train_model_ru.py](mdc:scripts/training/train_model_ru.py) - Обучение русской модели
+
+- **`data/`** - Данные проекта
+  - **`raw/`** - Исходные данные для обучения
+  - **`processed/`** - Обработанные данные
+
+- **`models/`** - Обученные модели
+- **`docs/`** - Документация
+- **`configs/`** - Конфигурационные файлы
+
+## Ключевые файлы
+
+- [Makefile](mdc:Makefile) - Команды для управления проектом
+- [README.md](mdc:README.md) - Основная документация
+- [requirements.txt](mdc:requirements.txt) - Зависимости Python

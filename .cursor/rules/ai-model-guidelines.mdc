@@ -1,0 +1,90 @@
+---
+globs: *train*.py,*model*.py,*generate*.py
+description: Руководство по работе с ИИ моделями в проекте
+---
+
+# Руководство по работе с ИИ моделями
+
+## Модели в проекте
+
+### Английская модель
+- **Базовая модель**: `distilgpt2`
+- **Файл обучения**: [src/train_model.py](mdc:src/train_model.py)
+- **Файл генерации**: [src/generate_text.py](mdc:src/generate_text.py)
+
+### Русская модель
+- **Базовая модель**: `ai-forever/rugpt3small_based_on_gpt2`
+- **Файл обучения**: [scripts/training/train_model_ru.py](mdc:scripts/training/train_model_ru.py)
+
+## Обучение моделей
+
+### Параметры обучения
+```python
+training_args = TrainingArguments(
+    output_dir='./models',
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    per_device_eval_batch_size=4,
+    warmup_steps=500,
+    weight_decay=0.01,
+    logging_dir='./logs',
+    logging_steps=10,
+    save_steps=1000,
+    eval_steps=1000,
+    evaluation_strategy="steps",
+    save_strategy="steps",
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_loss",
+    greater_is_better=False,
+)
+```
+
+### Обработка данных
+```python
+# Для языкового моделирования
+def tokenize_function(examples):
+    return tokenizer(examples["text"], truncation=True, padding=True, max_length=512)
+
+# Важно: для causal LM устанавливаем labels = input_ids
+def tokenize_function_with_labels(examples):
+    tokenized = tokenizer(examples["text"], truncation=True, padding=True, max_length=512)
+    tokenized["labels"] = tokenized["input_ids"].copy()
+    return tokenized
+```
+
+## Генерация текста
+
+### Параметры генерации
+```python
+generation_config = {
+    "max_length": 200,
+    "num_return_sequences": 1,
+    "temperature": 0.7,
+    "do_sample": True,
+    "top_p": 0.9,
+    "top_k": 50,
+    "repetition_penalty": 1.1,
+    "pad_token_id": tokenizer.eos_token_id,
+}
+```
+
+### Обработка промптов
+```python
+# Добавляем специальные токены для лучшего качества
+prompt = f"<|startoftext|>{user_prompt}<|endoftext|>"
+```
+
+## Загрузка моделей
+
+### Проверка доступности
+```python
+def load_model_safely(model_name, local_path=None):
+    try:
+        if local_path and os.path.exists(local_path):
+            return AutoModelForCausalLM.from_pretrained(local_path)
+        else:
+            return AutoModelForCausalLM.from_pretrained(model_name)
+    except Exception as e:
+        logger.warning(f"Не удалось загрузить модель {model_name}: {e}")
+        return None
+```
