@@ -22,6 +22,8 @@ wheels/
 
 # Virtual Environment
 venv/
+venv_new/
+venv_*/
 env/
 ENV/
 
@@ -42,7 +44,7 @@ models/*.pth
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
-# Logs
+# Logsnv 
 logs/
 *.log
 
