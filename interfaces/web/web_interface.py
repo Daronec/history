@@ -5,7 +5,7 @@
 
 import sys
 import os
-sys.path.append('../../src')
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../src'))
 
 from flask import Flask, render_template, request, jsonify
 import json
@@ -23,11 +23,15 @@ def load_models():
     """Загружает обе модели"""
     global english_model, russian_model
     
+    # Получаем абсолютный путь к корню проекта
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+    models_path = os.path.join(project_root, 'models')
+    
     try:
         # Загружаем английскую модель
         print("🔄 Загружаем английскую модель...")
         english_model = HistoryAIModel()
-        english_model.load_trained_model('../../models/history_ai_trained')
+        english_model.load_trained_model(os.path.join(models_path, 'history_ai_trained'))
         print("✅ Английская модель загружена")
         
         # Загружаем русскую модель (если есть)
@@ -36,7 +40,7 @@ def load_models():
             russian_model = HistoryAIModelRU()
             # Сначала пытаемся загрузить обученную модель, если не получается - предобученную
             try:
-                russian_model.load_trained_model('../../models/history_ai_ru_trained')
+                russian_model.load_trained_model(os.path.join(models_path, 'history_ai_ru_trained'))
                 print("✅ Обученная русская модель загружена")
             except:
                 print("🔄 Загружаем предобученную русскую модель...")
