@@ -36,9 +36,9 @@ ENV/
 models/*.pt
 models/*.pth
 
-# Data files
-data/raw/*
-data/processed/*
+# Data files (keep in Git LFS)
+# data/raw/* - keep for training via LFS
+# data/processed/* - keep for training via LFS
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
